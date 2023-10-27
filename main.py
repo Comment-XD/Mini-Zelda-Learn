@@ -3,8 +3,8 @@ from src.map import Map
 from src.game import Game
 from src.player import Player
 
-level_one = Level(Map.level_one)
-level_two = Level(Map.level_two)
+level_one = Level("one", Map.level_one)
+level_two = Level("two", Map.level_two)
 
 game = Game([level_one, level_two])
 
@@ -27,11 +27,13 @@ Player Options:
 User Input: """)
     match user_input:
         case "1":
-           move_option = input(
+           actions = input(
 f"""
-Which direction you want to move?
-{player.menu_options()}
+What actions do you want to do?
+{player.menu()}
 """)
-           player.move(move_option)
+           player.action(actions)
         case "2":
             print(player.inventory_str())
+            
+    

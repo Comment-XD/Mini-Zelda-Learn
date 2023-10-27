@@ -90,6 +90,9 @@ class Player:
         # for every item in the crates, go through the add_items method
         for item in crate.loot:
             self.add_item(item)
+        
+        #sets the crate loot to empty
+        crate.loot = []
     
     def get_tile(self, direction: str) -> Tile:
         
@@ -103,7 +106,7 @@ class Player:
 
         return None
         
-    def menu_options(self) -> str:
+    def menu(self) -> str:
         menu_option_str = "stay: do nothing\n"
         
         # gets the keys from the movement dictionary
@@ -116,11 +119,11 @@ class Player:
             if isinstance(tile, Tile):
                 menu_option_str += f"{key}: move {key}\n"
             if isinstance(tile, Lever):
-                menu_option_str += f"{key}: Lever Status: {tile.activated}\n"
+                menu_option_str += f"{key}: Lever Status -> {tile.status}\n"
             if isinstance(tile, Button):
-                menu_option_str += f"{key}: Button Status: {tile.status}\n"
+                menu_option_str += f"{key}: Button Status -> {tile.status}\n"
             if isinstance(tile, Exit):
-                menu_option_str += f"{key}: Exit Status: {tile.status}\n"
+                menu_option_str += f"{key}: Exit Status -> {tile.status}\n"
             if isinstance(tile, Crate):
                 menu_option_str += f"{key}: Crate\n"
         
@@ -136,22 +139,54 @@ class Player:
 
         return key_options
     
-    def move(self, direction: str) -> None:
-        if direction in self.key_options():
-            tile = self.get_tile(direction)
-            # sets the player's original position as "None"
-            self.lvl.map[(self.x, self.y)] = self.cache[-1]
-            
-            # gets the player's new movement vector
-            new_pos_x, new_pos_y = self.movement[direction]
-            
-            #adds the movement vector onto the players position vector
-            self.x += new_pos_x
-            self.y += new_pos_y
+    def move(self, direction: str, cache_item) -> None:
+        
+        self.lvl.map[(self.x, self.y)] = self.cache[-1]
+                
+        # Removes the previously saved tile
+        self.cache.pop()
+                
+        # Saves the tile you are going towards
+        self.cache.append(cache_item)
+                
+        # gets the player's new movement vector
+        new_pos_x, new_pos_y = self.movement[direction]
+                
+        #adds the movement vector onto the players position vector
+        self.x += new_pos_x
+        self.y += new_pos_y
+        
+        # sets the player on the level map
+        self.lvl.map[(self.x, self.y)] = self
     
+    def action(self, direction: str) -> None:
+        if direction == "stay":
+            # if the direction is stay, do nothing
+            return
+        
+        if direction in self.key_options():
             
-            # sets the player's new position as player
-            self.lvl.map[(self.x, self.y)] = self
+            tile = self.get_tile(direction)
+            
+            if isinstance(tile, Tile):
+                self.move(direction, tile)
+                
+            if isinstance(tile, Lever):
+                tile.status = True # should set the lever's activated state to True
+                for exit in self.lvl.exits:
+                    exit.update_status()
+                
+            if isinstance(tile, Exit):
+                if tile.status:
+                    self.move(direction, Tile())
+                
+            if isinstance(tile, Crate):
+                self.open_crate(tile)
+                self.move(direction, Tile())
+            
+            # if player hits the ending mark, player should go to the next lvl
+            # but how...
+                
     
     def __str__(self) -> str:
         return "*"

@@ -7,16 +7,18 @@ from src.crate import Crate
 from src.wall import Wall
 from src.item import Item
 
+levers_level_one = [Lever()]
+
 
 class Map:
     """
     This is a static class with all the different maps for the levels
     """
     
-    # the levels below are just examples, we will eventually replace them with objects
+    # find a way to link the lever to the exit 
     level_one = np.array([[Tile(), Wall(), Wall(), Tile()],
-                          [Tile(), Crate(Item("Lighter", "It lights Things")), Wall(), Exit()],
-                          [Tile(), Lever(), Wall(), Tile()],
+                          [Tile(), Crate(Item("Lighter", "It lights Things")), Wall(), Exit(levers_level_one)],
+                          [Tile(), levers_level_one[0], Wall(), Tile()],
                           [Tile(), Tile(), Tile(), Tile()]])
     
     level_two = np.array([[None, Wall(), Crate("Loot"), None],

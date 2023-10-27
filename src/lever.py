@@ -1,6 +1,6 @@
 class Lever:
     def __init__(self) -> None:
-        self.activated = False
+        self.status = False
     
     def __str__(self) -> str:
         return "/"

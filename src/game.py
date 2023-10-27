@@ -17,8 +17,10 @@ class Game:
         player.lvl = self.levels[self.player_level]
         self.levels[self.player_level].spawn_player(player)
     
-    def next_level(self) -> None:
+    def next_level(self, player) -> None:
         self.player_level += 1
+        player.lvl = self.levels[self.player_level]
+        self.levels[self.player_level].spawn_player(player)
     
     def victory(self) -> bool:
         # this code will not work as we are checking self.status to see if player has completed the game
