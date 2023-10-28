@@ -1,5 +1,6 @@
 from src.map import Map
 from src.exit import Exit
+from src.spawn import Spawn
 
 class Level:
     def __init__(self, name: str, map: Map) -> None:
@@ -12,9 +13,17 @@ class Level:
         self.name = name
         self.map = map
         self.status = False
-        self.exits = self.find_exit()
+        # each level should have a spawning location
+        self.spawn = self.find_spawn()
         
         # Level should keep track of where the exit is
+        self.exits = self.find_exit()
+
+    def find_spawn(self):
+        for i, row in enumerate(self.map):
+            for j, tile in enumerate(row):
+                if isinstance(tile, Spawn):
+                    return (i, j)
         
     def find_exit(self):
         exits = []
@@ -29,7 +38,9 @@ class Level:
     
     def spawn_player(self, player):
         # find the spawn spot obj and replace it with player, sets the player's position to that spot
-        self.map[(player.x, player.y)] = player
+        player.x, player.y = self.spawn
+        self.map[player.x][player.y] = player
+        
     
     def update_status(self):
         pass

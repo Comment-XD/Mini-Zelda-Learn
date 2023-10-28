@@ -101,8 +101,8 @@ class Player:
         map_dim_x, map_dim_y = (len(self.lvl.map), len(self.lvl.map[0]))
         
         # this shit be looking dodo be, ill find a way
-        if new_pos_x < map_dim_x and new_pos_y < map_dim_y and new_pos_x >= 0 and new_pos_y >= 0 and not isinstance(self.lvl.map[(new_pos_x, new_pos_y)], Wall):
-            return self.lvl.map[(new_pos_x, new_pos_y)]
+        if new_pos_x < map_dim_x and new_pos_y < map_dim_y and new_pos_x >= 0 and new_pos_y >= 0 and not isinstance(self.lvl.map[new_pos_x][new_pos_y], Wall):
+            return self.lvl.map[new_pos_x][new_pos_y]
 
         return None
         
@@ -141,7 +141,7 @@ class Player:
     
     def move(self, direction: str, cache_item) -> None:
         
-        self.lvl.map[(self.x, self.y)] = self.cache[-1]
+        self.lvl.map[self.x][self.y] = self.cache[-1]
                 
         # Removes the previously saved tile
         self.cache.pop()
@@ -157,7 +157,7 @@ class Player:
         self.y += new_pos_y
         
         # sets the player on the level map
-        self.lvl.map[(self.x, self.y)] = self
+        self.lvl.map[self.x][self.y] = self
     
     def action(self, direction: str) -> None:
         if direction == "stay":
@@ -179,6 +179,8 @@ class Player:
             if isinstance(tile, Exit):
                 if tile.status:
                     self.move(direction, Tile())
+                    print("testing")
+                    self.lvl.status = True
                 
             if isinstance(tile, Crate):
                 self.open_crate(tile)

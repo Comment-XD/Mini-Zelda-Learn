@@ -27,12 +27,17 @@ Player Options:
 User Input: """)
     match user_input:
         case "1":
-           actions = input(
+            actions = input(
 f"""
 What actions do you want to do?
 {player.menu()}
-""")
-           player.action(actions)
+""")        
+            player.action(actions)
+            
+            if player.lvl.status:
+                game.next_level(player)
+            
+          
         case "2":
             print(player.inventory_str())
             

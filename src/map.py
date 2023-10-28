@@ -6,8 +6,9 @@ from src.exit import Exit
 from src.crate import Crate
 from src.wall import Wall
 from src.item import Item
+from src.spawn import Spawn
 
-levers_level_one = [Lever()]
+levers_1 = [Lever(), Lever()]
 
 
 class Map:
@@ -16,12 +17,14 @@ class Map:
     """
     
     # find a way to link the lever to the exit 
-    level_one = np.array([[Tile(), Wall(), Wall(), Tile()],
-                          [Tile(), Crate(Item("Lighter", "It lights Things")), Wall(), Exit(levers_level_one)],
-                          [Tile(), levers_level_one[0], Wall(), Tile()],
-                          [Tile(), Tile(), Tile(), Tile()]])
+    level_one = [[Tile(), levers_1[0], Wall(), Tile()],
+                [Spawn(), Crate(Item("Lighter", "It lights Things")), Wall(), Tile()],
+                [Tile(), levers_1[1], Wall(), Tile(), Tile()],
+                [Tile(), Tile(), Tile(), Tile(), Tile(), Tile()],
+                [Tile(), Crate(Item("Lighter", "It lights Things")), Exit(levers_1), Tile(), Tile()],
+                [Tile(), Tile(), Tile(), Tile()]]
     
-    level_two = np.array([[None, Wall(), Crate("Loot"), None],
-                          [None, Wall(), Wall(), Exit()],
-                          [None, Lever(), Wall(), None],
-                          [None, None, None, None]])
+    level_two = [[Tile(), Wall(), Crate("Loot"), Tile()],
+                [Tile(), Wall(), Wall(), Exit()],
+                [Tile(), Lever(), Wall(), Tile()],
+                [Spawn(), Tile(), Tile(), Tile()]]
