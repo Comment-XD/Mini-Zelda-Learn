@@ -189,7 +189,6 @@ class Player:
             # if player hits the ending mark, player should go to the next lvl
             # but how...
                 
-    
     def __str__(self) -> str:
         return "*"
     
