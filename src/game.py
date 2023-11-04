@@ -1,5 +1,6 @@
 from src.level import Level
 
+
 class Game:
     def __init__(self, levels: list[Level]) -> None:
         """
@@ -21,6 +22,10 @@ class Game:
         self.player_level += 1
         player.lvl = self.levels[self.player_level]
         self.levels[self.player_level].spawn_player(player)
+    
+    def spawn_mobs(self):
+        pass
+        
     
     def victory(self) -> bool:
         # this code will not work as we are checking self.status to see if player has completed the game

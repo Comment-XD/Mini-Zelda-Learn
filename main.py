@@ -24,6 +24,10 @@ Player Options:
 ---------------
 1. Move
 2. Inventory
+3. Consume Item
+4. Player Stats 
+5. Weapon Stats
+
 User Input: """)
     match user_input:
         case "1":
@@ -40,5 +44,18 @@ What actions do you want to do?
           
         case "2":
             print(player.inventory_str())
+        
+        case "3":
+            item = input(
+f"""
+Which Item do you want to consume?
+{player.consumables_str()}
+""")  
+            player.consume(item)
+        case "4":
+            player.stats()
+        
+        case "5":
+            player.weapon_stats()
             
     
