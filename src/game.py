@@ -20,20 +20,26 @@ class Game:
     
     def next_level(self, player) -> None:
         self.player_level += 1
+        if self.player_level >= len(self.levels):
+            return
+        player.lvl.status = True
         player.lvl = self.levels[self.player_level]
         self.levels[self.player_level].spawn_player(player)
     
     def spawn_mobs(self):
+        # idk if game should be spawning mobs into the level or the level class itself
+        # will look into this further, idk if this is going to be an issue 
         pass
         
     
-    def victory(self) -> bool:
+    def update_status(self) -> bool:
         # this code will not work as we are checking self.status to see if player has completed the game
         for level in self.levels:
             if level.status is False:
-                return False
+                self.status = False
+                return 
         
-        return True
+        self.status = True
         
         
         

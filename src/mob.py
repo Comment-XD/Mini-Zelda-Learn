@@ -13,6 +13,7 @@ class Mob(Player):
     
     def follow_player(self):
         # Later on we can add a pathfinder where the mobs will go towards the players
+        # coming soon...
         pass
         
 class Golem(Mob):
@@ -23,7 +24,10 @@ class Golem(Mob):
         self.weapon_list = [Melee("Hammer", 5)]
         
         # randomly choices an item for the player to obtain from the mob
-        self.loot = random.choice([Healing("Rock Crystals", count=2)] + self.weapon_list) 
+        self.loot = [Healing("Rock Crystals", count=2)] + self.weapon_list
+    
+    def __str__(self) -> str:
+        return "G"
 
 class Goblin(Mob):
     def __init__(self, name: str, lvl: Level = None, x: int=0, y: int=0) -> None:

@@ -40,13 +40,11 @@ class Level:
         # find the spawn spot obj and replace it with player, sets the player's position to that spot
         player.x, player.y = self.spawn
         self.map[player.x][player.y] = player
-        
-    
-    def update_status(self):
-        pass
-        
+            
     def display(self):
-        print(f"Level {self.name}")
+        
+        # displays the level into a string form
+        print(f"{self.name}") 
         for row in self.map:
             for tile in row:
                 print(f"{tile} ", end="")

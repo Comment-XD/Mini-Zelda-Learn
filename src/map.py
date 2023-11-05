@@ -9,8 +9,7 @@ from src.spawn import Spawn
 
 from src.item import*
 
-levers_1 = [Lever(), Lever()]
-
+levers_1 = [Lever()]
 
 class Map:
     """
@@ -18,12 +17,11 @@ class Map:
     """
     
     # find a way to link the lever to the exit 
-    level_one = [[Tile(), levers_1[0], Wall(), Tile()],
-                [Spawn(), Crate(Item("Lighter", "It lights Things")), Wall(), Tile()],
-                [Tile(), levers_1[1], Wall(), Tile(), Tile()],
-                [Healing("Goblin Heart"), Tile(), Tile(), Tile(), Tile(), Tile()],
-                [Tile(), Crate(Item("Lighter", "It lights Things")), Exit(levers_1), Tile(), Tile()],
-                [Tile(),  Tile(), Tile(), Tile()]]
+    level_one = [[Tile(), Tile(), Wall(), Tile()],
+                [Spawn(), Crate(Item("Lighter")), Wall(), Tile()],
+                [Tile(), levers_1[0], Wall(), Tile()],
+                [Healing("Goblin Heart"), Tile(), Tile(), Tile()],
+                [Tile(), Crate(Item("Lighter")), Exit(levers_1), Tile()]]
     
     level_two = [[Tile(), Wall(), Crate("Loot"), Tile()],
                 [Tile(), Wall(), Wall(), Exit()],

@@ -46,8 +46,7 @@ class Player:
         self.movement = {"up":    (-self.speed,0),
                          "down":  (self.speed,0),
                          "left":  (0,-self.speed),
-                         "right": (0,self.speed),
-                         "stay":  (0,0)}
+                         "right": (0,self.speed)}
     
     def stats(self):
         print(f"""
@@ -61,22 +60,33 @@ Movement Speed: {self.speed}
 """)
     
     def weapon_stats(self):
-        print(f"""
-{self.weapon.name}
+        
+        weapon_one_name = self.weapon_list[0].name if self.weapon_list[0] is not None else "Empty"
+        weapon_two_name = self.weapon_list[1].name if self.weapon_list[1] is not None else "Empty"
+        weapon_one_pointer = ">" if self.weapon_slot == 0 else ""
+        weapon_two_pointer = ">" if self.weapon_slot == 1 else ""
+
+        
+        weapon_stats = "You are currently equipping Nothing"
+        if self.weapon is not None:
+            weapon_stats = f"""{self.weapon.name}
 > {self.weapon.desc}
 ---------------------
 Durability: {self.weapon.durability}
 Range: {self.weapon.range}
 Damage: {self.weapon.dmg}
-Durability Loss: {self.weapon.durability_loss}
-""")
+Durability Loss: {self.weapon.durability_loss}"""
+        print(f"""
+[{weapon_one_pointer}{weapon_one_name}|{weapon_two_pointer}{weapon_two_name}]
+
+{weapon_stats}""")
     
     def inventory_str(self):
         
         # returns the inventory in a string form
         inventory_str = "\nInventory\n"
         for item in self.inventory:
-            inventory_str += f"{item.name}: {item.count}\n>{item.desc}\n"
+            inventory_str += f"{item.name}: {item.count}\n> {item.desc}\n"
 
         return inventory_str
     
@@ -86,7 +96,7 @@ Durability Loss: {self.weapon.durability_loss}
         consumable_str = "Consumables\n"
         for item in self.inventory:
             if isinstance(item, Consumable):
-                consumable_str += f"{item.name}: {item.count}\n>{item.desc}\n"
+                consumable_str += f"{item.name}: {item.count}\n> {item.desc}\n"
 
         return consumable_str
         
@@ -102,34 +112,52 @@ Durability Loss: {self.weapon.durability_loss}
         return None
     
     def add_weapon(self, weapon: Weapon):
+        #checks to see if there is any empty space, 
+        # if so replace that empty space with the weapon you want to add
+        
         if None in self.weapon_list:
             self.weapon_list.remove(None)
             self.weapon_list.append(weapon)
             
-    
     def remove_weapon(self, name: str):
-        weapon = self.find_item(name)
+        # checks to see if the weapon exists
+        weapon = self.find_weapon(name)
         
+        # if so, remove the weapon and replace it with a None
         if weapon is not None:
             self.weapon_list.remove(weapon)
             self.weapon_list.append(None)
+            
+            self.weapon = self.weapon_list[self.weapon_slot]
     
     def switch_weapon_slot(self):
         # switches the weapon_slot
         match self.weapon_slot:
             case 0: self.weapon_slot = 1
             case 1: self.weapon_slot = 0
+
+        self.weapon = self.weapon_list[self.weapon_slot]
     
     def attack(self, mob) -> None:
         # just decreases the mobs health, can be improved later on
         
-        #decreases the weapon durability after each attack
-        self.weapon.durability -= self.weapon.durability_loss
-        if self.weapon.is_broken():
-            print(f"{self.weapon.name} has broken!")
-            self.weapon_list[self.weapon_slot] = None
+        # later on we are going to add range of the weapon, 
+        # need to use distance formula to determine if the mob is within range of the player, 
+        # if it is, add an option to the menu for attack specifically
+        # the same is applied for mobs (I will test this mechanism in a seperate python file)
         
-        mob.health -= self.dmg
+        #decreases the weapon durability after each attack
+        if self.weapon is not None:
+            self.weapon.durability -= self.weapon.durability_loss
+            
+            #checks to see if the weapon is broken, if it is replace that weapon with a None
+            if self.weapon.is_broken():
+                print(f"{self.weapon.name} has broken!")
+                self.weapon_list[self.weapon_slot] = None
+            
+            mob.health -= self.dmg
+        else:
+            print("\n You currently are equipping nothing")
     
     def find_item(self, item_to_find: Item) -> Item: 
         # this way of finding the item is so ass
@@ -178,7 +206,11 @@ Durability Loss: {self.weapon.durability_loss}
          
         # for every item in the crates, go through the add_items method
         for item in obj.loot:
-            self.add_item(item)
+            if isinstance(item, Item):
+                self.add_item(item)
+            
+            if isinstance(item, Weapon):
+                self.add_weapon(item)
     
     def consume(self, item_to_consume: str):
         item = self.find_item(item_to_consume)
@@ -227,7 +259,7 @@ Durability Loss: {self.weapon.durability_loss}
             if isinstance(tile, Crate):
                 menu_option_str += f"{key}: Crate\n"
             if isinstance(tile, Player):
-                menu_option_str += f"{key}: {tile.name}: Health->{tile.health} Dmg->{tile.dmg}"
+                menu_option_str += f"{key}: {tile.name}: Health->{tile.health} Dmg->{tile.dmg}\n"
         
         return menu_option_str
     
@@ -263,7 +295,7 @@ Durability Loss: {self.weapon.durability_loss}
     
     def action(self, direction: str) -> None:
         if direction == "stay":
-            # if the direction is stay, do nothing
+            # if the direction is stay, do nothing (this is not neccesary)
             return
         
         if direction in self.key_options():
