@@ -2,7 +2,7 @@ from src.level import Level
 from src.map import Map
 from src.game import Game
 from src.player import Player
-from src.mob import*
+from src.item import*
 import os
 
 level_one = Level("Stone Valley", Map.level_one)
@@ -16,7 +16,9 @@ print("Welcome to Mini-Link!\n")
 
 #starts the game
 game.start(player)
-player.lvl.map[4][3] = Golem("Bob", player.lvl, 4, 3) # Here to test (Remove when mob generation is complete)
+
+# spawns the mobs, at the beginning
+player.lvl.spawn_mobs()
 
 while not game.status:
     player.lvl.display()
@@ -35,6 +37,10 @@ f"""
 User Input: """)
     match user_input:
         case "1":
+            
+            # this is to apply the effects of the player and check how long it lasts
+            player.effect_timer()
+            
             actions = input(
 f"""
 What actions do you want to do?
@@ -45,7 +51,8 @@ What actions do you want to do?
             if player.lvl.status:
                 game.next_level(player)
             
-          
+            player.lvl.mob_pathfinding(player)
+            
         case "2":
             print(player.inventory_str())
             
@@ -68,7 +75,7 @@ Which Item do you want to consume?
             player.consume(item)
         case "4":
             player.stats()
-            input("Press Any Button to Continue...")
+            input("Press Enter to Continue...")
             os.system('cls')
         
         case "5":
@@ -85,16 +92,28 @@ Answer: """)
                     weapon_name = input("\nWhat weapon do you want to remove? ")
                     player.remove_weapon(weapon_name)
                     
-            input("Press Any Button to Continue...")
+            input("Press Enter to Continue...")
             os.system('cls')
         case "6":
-            # Later on add a info section to help the players identify and play the game
-            pass
+            print("""
+Info Section
+------------
+>Objective is to unlock levers (/) which allow you to go through Gates (~)
+Going through gates allow you to access the next level!
+
+* - Player
+Letters - Mobs Ex. (G- Golemn)
+$ - Crates
+# - Walls
+~ - Gate
+/ - Levers
++ - Healing Items
+- - Damage Buff Items
+""")
+
+            input("Press Enter to Continue...")
+            os.system('cls')
+    
     game.update_status()
         
-            
-
 print("You Win!")
-    
-            
-    

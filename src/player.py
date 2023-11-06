@@ -1,4 +1,4 @@
-from src.level import Level
+# from src.level import Level
 from src.item import Item
 from src.tile import Tile
 from src.lever import Lever
@@ -10,7 +10,7 @@ from src.item import*
 from src.weapon import*
 
 class Player:
-    def __init__(self, name: str, lvl: Level=None, x: int=0, y: int=0) -> None:
+    def __init__(self, name: str, lvl=None, x: int=0, y: int=0) -> None:
         """This is a player class that does adventurous stuff
 
         Args:
@@ -24,10 +24,10 @@ class Player:
         self.name = name
         
         self.health = 5
-        self.maxHealth = 5
+        self.maxHealth = 10
+        self.effects = []
         
-        
-        self.inventory = [Item("Lighter")]
+        self.inventory = [Regeneration("Apple", 2), Damage_Buff("Strength", 2)]
         
         self.weapon_list = [Melee("Sword", 2), None]
         self.weapon_slot = 0
@@ -48,18 +48,19 @@ class Player:
                          "left":  (0,-self.speed),
                          "right": (0,self.speed)}
     
-    def stats(self):
+    def stats(self) -> None:
         print(f"""
 {self.name}
 ---------------------
 Health: {self.health}
 Max Health: {self.maxHealth}
+Effects: {[type(effect).__name__ for effect in self.effects]}
 Equipped Weapon: {self.weapon.name}
 Damage: {self.dmg}
 Movement Speed: {self.speed}
 """)
     
-    def weapon_stats(self):
+    def weapon_stats(self) -> None:
         
         weapon_one_name = self.weapon_list[0].name if self.weapon_list[0] is not None else "Empty"
         weapon_two_name = self.weapon_list[1].name if self.weapon_list[1] is not None else "Empty"
@@ -81,7 +82,7 @@ Durability Loss: {self.weapon.durability_loss}"""
 
 {weapon_stats}""")
     
-    def inventory_str(self):
+    def inventory_str(self) -> str:
         
         # returns the inventory in a string form
         inventory_str = "\nInventory\n"
@@ -90,7 +91,7 @@ Durability Loss: {self.weapon.durability_loss}"""
 
         return inventory_str
     
-    def consumables_str(self):
+    def consumables_str(self) -> str:
         
         # returns the inventory in a string form
         consumable_str = "Consumables\n"
@@ -104,14 +105,14 @@ Durability Loss: {self.weapon.durability_loss}"""
         #returns a boolean value depending on if the player's health is less than equal to 0
         return self.health <= 0
     
-    def find_weapon(self, name):
+    def find_weapon(self, name: str) -> Weapon:
         for weapon in self.weapon_list:
             if name.lower() == weapon.name.lower():
                 return weapon
             
         return None
     
-    def add_weapon(self, weapon: Weapon):
+    def add_weapon(self, weapon: Weapon) -> None:
         #checks to see if there is any empty space, 
         # if so replace that empty space with the weapon you want to add
         
@@ -119,7 +120,7 @@ Durability Loss: {self.weapon.durability_loss}"""
             self.weapon_list.remove(None)
             self.weapon_list.append(weapon)
             
-    def remove_weapon(self, name: str):
+    def remove_weapon(self, name: str) -> None:
         # checks to see if the weapon exists
         weapon = self.find_weapon(name)
         
@@ -130,7 +131,7 @@ Durability Loss: {self.weapon.durability_loss}"""
             
             self.weapon = self.weapon_list[self.weapon_slot]
     
-    def switch_weapon_slot(self):
+    def switch_weapon_slot(self) -> None:
         # switches the weapon_slot
         match self.weapon_slot:
             case 0: self.weapon_slot = 1
@@ -212,7 +213,7 @@ Durability Loss: {self.weapon.durability_loss}"""
             if isinstance(item, Weapon):
                 self.add_weapon(item)
     
-    def consume(self, item_to_consume: str):
+    def consume(self, item_to_consume: str) -> None:
         item = self.find_item(item_to_consume)
         print(item.__str__())
         if isinstance(item, Healing):
@@ -221,7 +222,33 @@ Durability Loss: {self.weapon.durability_loss}"""
             
             if self.health > self.maxHealth:
                 self.health = self.maxHealth
-            
+                
+        if isinstance(item, Damage):
+            self.dmg += item.dmg
+            self.remove_item(item)
+        
+        if isinstance(item, Regeneration):
+            self.effects.append(item)
+            self.remove_item(item)     
+        
+        if isinstance(item, Damage_Buff):
+            self.effects.append(item)
+            self.remove_item(item)      
+    
+    def effect_timer(self):
+        for effect in self.effects:
+                if isinstance(effect, Regeneration):
+                    self.health += effect.heal
+                    effect.time -= 1
+                    
+                if isinstance(effect, Damage_Buff):
+                    self.dmg = self.weapon.dmg + effect.dmg
+                    effect.time -= 1
+                    # when effect is 0, reset the player's damage back to the weapon
+                
+                if effect.time <= 0:
+                    self.effects.remove(effect)
+    
     def get_tile(self, direction: str) -> Tile:
         
         #adds the movement vector onto the players position vector
@@ -331,7 +358,13 @@ Durability Loss: {self.weapon.durability_loss}"""
                 if tile.is_dead():
                     self.loot(tile)
                     self.move(direction, Tile())
-                               
+                    self.lvl.active_mob_list.remove(tile) # do i need this rlly?
+                    self.lvl.total_active_mobs -= 1
+                
+                # when there is no active mobs on the level, spawn new ones
+                # if the level
+                if self.lvl.total_active_mobs <= 0 and not self.lvl.status:
+                       self.lvl.spawn_mobs()
             # if player hits the ending mark, player should go to the next lvl
             # but how...
                 
