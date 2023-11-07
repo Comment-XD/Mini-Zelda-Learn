@@ -1,4 +1,5 @@
 import random
+import copy
 
 from src.map import Map
 from src.exit import Exit
@@ -48,6 +49,7 @@ class Level:
         return exits
 
     def find_floor_tiles(self):
+        # needs to be dynamic as the player moves around and screws up the 
         
         # Returns all the floor tiles of the level
         floor_tiles = []
@@ -59,6 +61,7 @@ class Level:
                     floor_tiles.append((i,j))
         
         return floor_tiles
+
     
     def spawn_player(self, player):
         # find the spawn spot obj and replace it with player, sets the player's position to that spot
@@ -66,12 +69,13 @@ class Level:
         self.map[player.x][player.y] = player
     
     def spawn_mobs(self):
-        copy_floor_tiles = self.floor_tiles.copy()
+        copy_floor_tiles = copy.deepcopy(self.floor_tiles)
         self.total_active_mobs = self.difficulty
         
         for _ in range(self.difficulty):
             
-            mob = random.choice(self.mob_list)
+            mob = copy.deepcopy(random.choice(self.mob_list))
+            
             self.active_mob_list.append(mob)
             
             mob_spawn = random.choice(copy_floor_tiles)
@@ -84,11 +88,12 @@ class Level:
             
             self.map[mobSpawnX][mobSpawnY] = mob
             copy_floor_tiles.remove(mob_spawn)
-    
+     
     def mob_pathfinding(self, player):
         for mob in self.active_mob_list:
             mob.follow_player(player)
-        
+            mob.effects_timer(1)
+            
     def display(self):
         
         # displays the level into a string form
@@ -96,10 +101,4 @@ class Level:
         for row in self.map:
             for tile in row:
                 print(f"{tile} ", end="")
-            print("\n")
-    
-    
-    
-    
-    
-        
+            print("\n")       

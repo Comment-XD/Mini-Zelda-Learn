@@ -1,4 +1,6 @@
 # from src.level import Level
+import copy
+
 from src.item import Item
 from src.tile import Tile
 from src.lever import Lever
@@ -23,13 +25,13 @@ class Player:
         
         self.name = name
         
-        self.health = 5
+        self.health = 6
         self.maxHealth = 10
         self.effects = []
         
-        self.inventory = [Regeneration("Apple", 2), Damage_Buff("Strength", 2)]
+        self.inventory = [Healing("Apple", 2, effects=Regeneration()), Damage("Strength Pot", 2, effects=Strength())]
         
-        self.weapon_list = [Melee("Sword", 2), None]
+        self.weapon_list = [Melee("Sword", 2, Poison()), None]
         self.weapon_slot = 0
         self.weapon = self.weapon_list[self.weapon_slot]
         self.dmg = self.weapon.dmg
@@ -54,7 +56,7 @@ class Player:
 ---------------------
 Health: {self.health}
 Max Health: {self.maxHealth}
-Effects: {[type(effect).__name__ for effect in self.effects]}
+Effects: {[f"{type(effect).__name__}: {effect.time}t" for effect in self.effects]}
 Equipped Weapon: {self.weapon.name}
 Damage: {self.dmg}
 Movement Speed: {self.speed}
@@ -141,14 +143,22 @@ Durability Loss: {self.weapon.durability_loss}"""
     
     def attack(self, mob) -> None:
         # just decreases the mobs health, can be improved later on
-        
+        """
         # later on we are going to add range of the weapon, 
         # need to use distance formula to determine if the mob is within range of the player, 
         # if it is, add an option to the menu for attack specifically
         # the same is applied for mobs (I will test this mechanism in a seperate python file)
-        
-        #decreases the weapon durability after each attack
+        """
+        #add effects on weapon (poisen, fire, paralyzed, etc)
         if self.weapon is not None:
+            mob_effect = self.find_weapon_effect(mob)
+            
+            if self.weapon.effects is not None and mob_effect is None:
+                mob.effects.append(copy.deepcopy(self.weapon.effects))
+                    
+                print([f"{type(effect).__name__}: {effect.time}t" for effect in mob.effects])
+                
+            #decreases the weapon durability after each attack
             self.weapon.durability -= self.weapon.durability_loss
             
             #checks to see if the weapon is broken, if it is replace that weapon with a None
@@ -187,8 +197,8 @@ Durability Loss: {self.weapon.durability_loss}"""
             # simply removes the item from the inventory
             item.count -= 1
             
-            if item.count <= 0:
-                self.inventory.remove(item)
+        if item.count <= 0:
+            self.inventory.remove(item)
             
     def add_item(self, item_to_add: Item) -> None:
         # checks to see if there is any redundant items
@@ -205,7 +215,7 @@ Durability Loss: {self.weapon.durability_loss}"""
         
     def loot(self, obj) -> None:
          
-        # for every item in the crates, go through the add_items method
+        # for every item in the crates / mob, go through the add_items method
         for item in obj.loot:
             if isinstance(item, Item):
                 self.add_item(item)
@@ -215,40 +225,88 @@ Durability Loss: {self.weapon.durability_loss}"""
     
     def consume(self, item_to_consume: str) -> None:
         item = self.find_item(item_to_consume)
-        print(item.__str__())
-        if isinstance(item, Healing):
-            self.health += item.heal
-            self.remove_item(item)
+        
+        # if effect is none that means this item has no effects meaning its a long-term buff
+        
+        if item.effects is None:
             
+            if isinstance(item, Healing):
+                
+                # heals the player
+                self.health += item.heal
+                
+                # removes the item from inventory
+                self.remove_item(item)
+                
             if self.health > self.maxHealth:
                 self.health = self.maxHealth
-                
-        if isinstance(item, Damage):
-            self.dmg += item.dmg
-            self.remove_item(item)
-        
-        if isinstance(item, Regeneration):
-            self.effects.append(item)
-            self.remove_item(item)     
-        
-        if isinstance(item, Damage_Buff):
-            self.effects.append(item)
-            self.remove_item(item)      
-    
-    def effect_timer(self):
-        for effect in self.effects:
-                if isinstance(effect, Regeneration):
-                    self.health += effect.heal
-                    effect.time -= 1
                     
-                if isinstance(effect, Damage_Buff):
-                    self.dmg = self.weapon.dmg + effect.dmg
-                    effect.time -= 1
-                    # when effect is 0, reset the player's damage back to the weapon
+            if isinstance(item, Damage):
                 
-                if effect.time <= 0:
-                    self.effects.remove(effect)
+                # increases the damage of the player 
+                self.dmg += item.dmg
+                
+                # removes the item from inventory
+                self.remove_item(item)
+        
+        else:
+            
+            # finds the effect from the player's effects
+            effect = self.find_item_effect(item.effects)
+            
+            # if there is no effect, add the effect into the player's effects
+            if effect is None:
+                self.effects.append(copy.deepcopy(item.effects))
+                self.remove_item(item)     
+                
+            # if there is an effect, increase the time of that effect
+            else:
+                effect.time += item.effects.time
+                
+            self.effects_timer(0)
     
+    def find_item_effect(self, item) -> Effect:
+        for effect in self.effects:
+            if type(item) == type(effect):
+                return effect
+        
+        return None
+    
+    def find_weapon_effect(self, mob) -> Effect:
+        for effect in mob.effects:
+            if type(self.weapon.effects) == type(effect):
+                return effect
+        
+        return None
+    
+    def effects_timer(self, time: int) -> None:
+        # goes through every effect of player's effect
+        
+        for effect in self.effects:
+            if isinstance(effect, Regeneration):
+                # heals the player
+                self.health += effect.heal
+                # decreases the time 
+                effect.time -= time
+                
+            if isinstance(effect, Strength):
+                self.dmg = self.weapon.dmg + effect.dmg
+                effect.time -= time
+                
+                
+            if isinstance(effect, Poison):
+                # How do i link this to mob when it dies?, might need to modify the effect timer when applied to mobs
+                self.health -= effect.poison
+                effect.time -= time
+                
+            if effect.time <= 0 and type(effect) in [Poison, Regeneration]:
+                self.effects.remove(effect)
+            
+            # when effect is 0, reset the player's damage back to the weapon
+            if effect.time <= 0 and type(effect) in [Strength]:
+                self.dmg = self.weapon.dmg
+                self.effects.remove(effect)
+
     def get_tile(self, direction: str) -> Tile:
         
         #adds the movement vector onto the players position vector
@@ -319,6 +377,9 @@ Durability Loss: {self.weapon.durability_loss}"""
         
         # sets the player on the level map
         self.lvl.map[self.x][self.y] = self
+        
+        #updates the level's map's floor tile
+        self.lvl.floor_tiles = self.lvl.find_floor_tiles()
     
     def action(self, direction: str) -> None:
         if direction == "stay":
@@ -343,7 +404,6 @@ Durability Loss: {self.weapon.durability_loss}"""
                     self.lvl.status = True
             
             if isinstance(tile, Item):
-                print(tile.name)
                 self.add_item(tile)
                 
                 self.move(direction, Tile())
@@ -362,11 +422,8 @@ Durability Loss: {self.weapon.durability_loss}"""
                     self.lvl.total_active_mobs -= 1
                 
                 # when there is no active mobs on the level, spawn new ones
-                # if the level
                 if self.lvl.total_active_mobs <= 0 and not self.lvl.status:
-                       self.lvl.spawn_mobs()
-            # if player hits the ending mark, player should go to the next lvl
-            # but how...
+                    self.lvl.spawn_mobs()
                 
     def __str__(self) -> str:
         return "*"

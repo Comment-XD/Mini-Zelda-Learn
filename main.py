@@ -39,7 +39,7 @@ User Input: """)
         case "1":
             
             # this is to apply the effects of the player and check how long it lasts
-            player.effect_timer()
+            player.effects_timer(1)
             
             actions = input(
 f"""
@@ -108,12 +108,11 @@ $ - Crates
 ~ - Gate
 / - Levers
 + - Healing Items
-- - Damage Buff Items
+= - Strength Items
 """)
 
             input("Press Enter to Continue...")
             os.system('cls')
     
     game.update_status()
-        
 print("You Win!")

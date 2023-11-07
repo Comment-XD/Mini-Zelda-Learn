@@ -1,48 +1,37 @@
 from src.desc import Desc
+from src.effect import*
 
 class Item:
-    def __init__(self, name: str, count: int=1) -> None:
+    def __init__(self, name: str, count: int=1, effects=None) -> None:
         self.name = name
         self.desc = Desc.item[name]
         self.count = count
+        self.effects = effects
     
         
 class Consumable(Item):
-    def __init__(self, name: str, count: int = 1) -> None:
-        super().__init__(name, count)
+    def __init__(self, name: str, count: int = 1, effects=None) -> None:
+        super().__init__(name, count, effects)
 
 class Healing(Consumable):
-    def __init__(self, name: str, heal: int=1, count: int=1) -> None:
-        super().__init__(name, count)
+    def __init__(self, name: str, heal: int=1, count: int=1, effects=None) -> None:
+        super().__init__(name, count, effects)
         self.heal = heal
     
     def __str__(self) -> str:
         return "+"
         
 class Damage(Consumable):
-    def __init__(self, name: str, dmg: int=1, count: int=1) -> None:
-        super().__init__(name, count)
+    def __init__(self, name: str, dmg: int=1, count: int=1, effects=None) -> None:
+        super().__init__(name, count, effects)
         self.dmg = dmg
     
     def __str__(self) -> str:
-        return "-"
+        return "="
 
-class Effect(Consumable):
-    def __init__(self, name: str, count: int = 1) -> None:
-        super().__init__(name, count)
+# Items that can increase inventory space or weapon slots (COMING SOON!)
+class Utility(Item):
+    def __init__(self, name: str, count: int = 1, effects=None) -> None:
+        super().__init__(name, count, effects)
     
-    
-class Regeneration(Effect):
-    def __init__(self, name: str, heal: int, count: int = 1, time=2) -> None:
-        super().__init__(name, count)
-        self.heal = heal
-        self.time = time
-
-class Damage_Buff(Effect):
-    def __init__(self, name: str, dmg: int, count: int = 1, time=2) -> None:
-        super().__init__(name, count)
-        self.dmg = dmg
-        self.time = time
-    
-
 # Effect Timer, Adds effects on players for a certain time 

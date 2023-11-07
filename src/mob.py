@@ -8,13 +8,15 @@ from src.weapon import*
 from src.item import*
 
 class Mob(Player):
+    
     def __init__(self, name: str, lvl=None, x: int=0, y: int=0) -> None:
         super().__init__(name, lvl, x, y)
         self.loot = []
-        
+    
     def follow_player(self, player: Player):
         playerX = player.x
         playerY = player.y
+        
         
         best_key = list(self.movement.keys())[0]
         min_distance = np.sqrt((playerX - self.x)**2 + (playerY - self.y)**2)
@@ -46,15 +48,26 @@ class Mob(Player):
                     min_distance = distance
                 
                 # print(f"{key}: {min_distance}")
+                # print(f"{key} {tile.__str__()}")
 
+        # checks to make sure if the best key is actually a tile
+        if not isinstance(self.get_tile(best_key), Tile):
+            return
+        
         self.move(best_key, Tile())  
         
 class Golem(Mob):
     def __init__(self, name: str, lvl=None, x: int=0, y: int=0) -> None:
         super().__init__(name, lvl, x, y)
         
-        self.health = 5
+        self.health = 4
+        
+        self.effects = []
         self.weapon_list = [Melee("Hammer", 3)]
+        
+        self.weapon_slot = 0
+        self.weapon = self.weapon_list[self.weapon_slot]
+        self.dmg = self.weapon.dmg
         
         self.loot = [Healing("Rock Crystals", 2, 2)] + self.weapon_list
     
@@ -65,7 +78,13 @@ class Goblin(Mob):
     def __init__(self, name: str, lvl=None, x: int=0, y: int=0) -> None:
         super().__init__(name, lvl, x, y)
         self.health = 2
+        
+        self.effects = []
         self.weapon_list = [Melee("Dagger", 2)]
+        
+        self.weapon_slot = 0
+        self.weapon = self.weapon_list[self.weapon_slot]
+        self.dmg = self.weapon.dmg
         
         self.loot = [Healing("Goblin Heart", count=1)] + self.weapon_list
     

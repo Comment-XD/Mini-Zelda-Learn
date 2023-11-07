@@ -9,7 +9,7 @@ class Desc:
             "Rock Crystals": "A drop found from Golems, Heals 2 Hp",
             "Goblin Heart": "the heart of a goblin, Heals 1 Hp",
             "Apple": "A simple fruit with nutrition, Heals 2 Hp per turn, Lasts for 2 turns",
-            "Strength": "A potion that increase the damage of the player by 2, Lasts for 2 turns",
+            "Strength Pot": "A potion that increase the damage of the player by 2, Lasts for 2 turns",
             "Box": "Used to be placed on buttons"}
     
     # weapon is for weapon description
