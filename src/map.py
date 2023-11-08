@@ -1,15 +1,18 @@
 import numpy as np
+
 from src.tile import Tile
-from src.lever import Lever
-from src.button import Button
 from src.exit import Exit
 from src.crate import Crate
 from src.wall import Wall
 from src.spawn import Spawn
 
+from src.pushable import*
+from src.activator import*
+
 from src.item import*
 
-levers_1 = [Lever()]
+pushables_1 = [Boulder(3,1)]
+buttons_1 = [Hole(pushables_1)]
 
 class Map:
     """
@@ -18,10 +21,10 @@ class Map:
     
     # find a way to link the lever to the exit 
     level_one = [[Tile(), Tile(), Wall(), Tile()],
-                [Spawn(), Crate(Item("Lighter")), Wall(), Tile()],
-                [Tile(), levers_1[0], Wall(), Tile()],
-                [Healing("Goblin Heart"), Tile(), Tile(), Tile()],
-                [Tile(), Crate(Item("Lighter")), Exit(levers_1), Tile()]]
+                [Spawn(), Tile(), Wall(), Tile()],
+                [Tile(), buttons_1[0], Wall(), Tile()],
+                [Tile(), pushables_1[0], Tile(), Tile()],
+                [Tile(), Crate(Item("Lighter")), Exit(buttons_1), Tile()]]
     
     level_two = [[Tile(), Wall(), Crate("Loot"), Tile()],
                 [Tile(), Wall(), Wall(), Exit()],

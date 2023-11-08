@@ -1,13 +1,15 @@
 # from src.level import Level
 import copy
+import numpy as np
 
 from src.item import Item
 from src.tile import Tile
-from src.lever import Lever
-from src.button import Button
 from src.exit import Exit
 from src.crate import Crate
 from src.wall import Wall
+
+from src.activator import*
+from src.pushable import*
 from src.item import*
 from src.weapon import*
 
@@ -29,7 +31,7 @@ class Player:
         self.maxHealth = 10
         self.effects = []
         
-        self.inventory = [Healing("Apple", 2, effects=Regeneration()), Damage("Strength Pot", 2, effects=Strength())]
+        self.inventory = [Healing("Apple", 2, 2, Regeneration()), Damage("Strength Pot", 2, effects=Strength())]
         
         self.weapon_list = [Melee("Sword", 2, Poison()), None]
         self.weapon_slot = 0
@@ -75,9 +77,11 @@ Movement Speed: {self.speed}
             weapon_stats = f"""{self.weapon.name}
 > {self.weapon.desc}
 ---------------------
-Durability: {self.weapon.durability}
-Range: {self.weapon.range}
 Damage: {self.weapon.dmg}
+Range: {self.weapon.range}
+Effect: {type(self.weapon.effects).__name__} 
+Effect Time: {self.weapon.effects.time}t
+Durability: {self.weapon.durability}
 Durability Loss: {self.weapon.durability_loss}"""
         print(f"""
 [{weapon_one_pointer}{weapon_one_name}|{weapon_two_pointer}{weapon_two_name}]
@@ -149,6 +153,12 @@ Durability Loss: {self.weapon.durability_loss}"""
         # if it is, add an option to the menu for attack specifically
         # the same is applied for mobs (I will test this mechanism in a seperate python file)
         """
+        
+        # calculate the distance between the mob and the player
+        distance = np.sqrt((mob.x - (self.x))**2 + (mob.y - (self.y))**2)
+        if self.weapon.range >= distance:
+            pass
+        
         #add effects on weapon (poisen, fire, paralyzed, etc)
         if self.weapon is not None:
             mob_effect = self.find_weapon_effect(mob)
@@ -288,6 +298,9 @@ Durability Loss: {self.weapon.durability_loss}"""
                 self.health += effect.heal
                 # decreases the time 
                 effect.time -= time
+            
+            if self.health > self.maxHealth:
+                self.health = self.maxHealth
                 
             if isinstance(effect, Strength):
                 self.dmg = self.weapon.dmg + effect.dmg
@@ -314,7 +327,7 @@ Durability Loss: {self.weapon.durability_loss}"""
         map_dim_x, map_dim_y = (len(self.lvl.map), len(self.lvl.map[0]))
         
         # this shit be looking dodo be, ill find a way
-        if new_pos_x < map_dim_x and new_pos_y < map_dim_y and new_pos_x >= 0 and new_pos_y >= 0 and not isinstance(self.lvl.map[new_pos_x][new_pos_y], Wall):
+        if new_pos_x < map_dim_x and new_pos_y < map_dim_y and new_pos_x >= 0 and new_pos_y >= 0 and not (isinstance(self.lvl.map[new_pos_x][new_pos_y], Wall) or isinstance(self.lvl.map[new_pos_x][new_pos_y], Hole)):
             return self.lvl.map[new_pos_x][new_pos_y]
 
         return None
@@ -345,6 +358,8 @@ Durability Loss: {self.weapon.durability_loss}"""
                 menu_option_str += f"{key}: Crate\n"
             if isinstance(tile, Player):
                 menu_option_str += f"{key}: {tile.name}: Health->{tile.health} Dmg->{tile.dmg}\n"
+            if isinstance(tile, Pushable):
+                menu_option_str += f"{key}: Box, push?\n"
         
         return menu_option_str
     
@@ -405,9 +420,56 @@ Durability Loss: {self.weapon.durability_loss}"""
             
             if isinstance(tile, Item):
                 self.add_item(tile)
-                
                 self.move(direction, Tile())
+            
+            if isinstance(tile, Box):
+                # box or boulder first moves then the player moves
+                object_tile = tile.get_tile(self.lvl, direction)
                 
+                if isinstance(object_tile, Button):
+                    # checks to see if the object tile is an button, hole etc.
+                    tile.push(self.lvl, direction, object_tile)
+
+                else:
+                    # if not, just replace it with a tile
+                    tile.push(self.lvl, direction, Tile())
+                    
+                
+                # checks to see if the object's tile is not None, means that it moves
+                if object_tile is not None:
+                    #gets the tile after the pushable moves
+                    tile_after_push = self.get_tile(direction)
+                    
+                    # takes the that tile and moves
+                    self.move(direction, tile_after_push)
+                
+                #checks to see if the buttons are 
+                for button in self.lvl.buttons:
+                    button.update()
+                    
+                for exit in self.lvl.exits:
+                    exit.update_status()
+            
+            if isinstance(tile, Boulder):
+                object_tile = tile.get_tile(self.lvl, direction)
+                
+                if isinstance(object_tile, Hole):
+                    # checks to see if the object tile is an button, hole etc.
+                    self.lvl.map[tile.x][tile.y] = Tile()
+                    self.lvl.map[object_tile.x][object_tile.y] = Tile()
+
+                else:
+                    # if not, just replace it with a tile
+                    tile.push(self.lvl, direction, Tile())
+                
+                if object_tile is not None:
+                    #gets the tile after the pushable moves
+                    self.move(direction, Tile())
+                
+            if isinstance(tile, Button):
+                # tile.cache.append(self)
+                self.move(direction, tile)
+            
             if isinstance(tile, Crate):
                 self.loot(tile)
                 self.move(direction, Tile())

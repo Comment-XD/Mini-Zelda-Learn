@@ -13,7 +13,11 @@ class Mob(Player):
         super().__init__(name, lvl, x, y)
         self.loot = []
     
-    def follow_player(self, player: Player):
+    def drop_loot(self, player: Player) -> None:
+        player.loot(self)
+        # This is eventually for if the mob were to die form effects 
+        
+    def follow_player(self, player: Player) -> None:
         playerX = player.x
         playerY = player.y
         
@@ -55,7 +59,7 @@ class Mob(Player):
             return
         
         self.move(best_key, Tile())  
-        
+       
 class Golem(Mob):
     def __init__(self, name: str, lvl=None, x: int=0, y: int=0) -> None:
         super().__init__(name, lvl, x, y)
@@ -87,6 +91,23 @@ class Goblin(Mob):
         self.dmg = self.weapon.dmg
         
         self.loot = [Healing("Goblin Heart", count=1)] + self.weapon_list
+    
+    def __str__(self) -> str:
+        return "N"
+
+class Fire_Emblems(Mob):
+    def __init__(self, name: str, lvl=None, x: int=0, y: int=0) -> None:
+        super().__init__(name, lvl, x, y)
+        self.health = 2
+        
+        self.effects = []
+        self.weapon_list = [Melee("Dagger", 2)]
+        
+        self.weapon_slot = 0
+        self.weapon = self.weapon_list[self.weapon_slot]
+        self.dmg = self.weapon.dmg
+        
+        self.loot = [Item("Lighter", 1)] + self.weapon_list
     
     def __str__(self) -> str:
         return "N"

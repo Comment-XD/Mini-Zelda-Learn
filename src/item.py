@@ -29,9 +29,9 @@ class Damage(Consumable):
     def __str__(self) -> str:
         return "="
 
-# Items that can increase inventory space or weapon slots (COMING SOON!)
+# Items that can increase inventory space or weapon slots or disables traps(COMING SOON!)
 class Utility(Item):
     def __init__(self, name: str, count: int = 1, effects=None) -> None:
         super().__init__(name, count, effects)
-    
+        
 # Effect Timer, Adds effects on players for a certain time 

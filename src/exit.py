@@ -1,8 +1,5 @@
-from src.lever import Lever
-from src.button import Button
-
 class Exit:
-    def __init__(self: str, connections: list[Lever, Button]=[]) -> None:
+    def __init__(self: str, connections: list=[]) -> None:
         self.connections = connections
         self.status = False
     

@@ -1,9 +1,10 @@
+import os
+
 from src.level import Level
 from src.map import Map
 from src.game import Game
 from src.player import Player
 from src.item import*
-import os
 
 level_one = Level("Stone Valley", Map.level_one)
 level_two = Level("Goblins Den", Map.level_two)
@@ -18,7 +19,7 @@ print("Welcome to Mini-Link!\n")
 game.start(player)
 
 # spawns the mobs, at the beginning
-player.lvl.spawn_mobs()
+player.lvl.spawn_mobs() # Uncomment this to start the mob generation
 
 while not game.status:
     player.lvl.display()
@@ -98,14 +99,17 @@ Answer: """)
             print("""
 Info Section
 ------------
->Objective is to unlock levers (/) which allow you to go through Gates (~)
+>Objective is to unlock levers (/) or Buttons(o) which allow you to go through Gates (~)
 Going through gates allow you to access the next level!
 
 * - Player
-Letters - Mobs Ex. (G- Golemn)
+Letters - Mobs Ex. (G-Golemn)
 $ - Crates
 # - Walls
 ~ - Gate
+] - Boxes
+@ - Boulders
+o - Buttons
 / - Levers
 + - Healing Items
 = - Strength Items

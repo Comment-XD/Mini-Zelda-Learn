@@ -28,3 +28,9 @@ class Poison(Effect):
     
     def __str__(self) -> str:
         return "-"
+
+class Burned(Effect):
+    def __init__(self, time: int = 2) -> None:
+        super().__init__(time)
+        self.name = "Burned"
+        self.burned = 1
